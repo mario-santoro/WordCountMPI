@@ -3,7 +3,7 @@ This project is only for the pcpc exam of the Università degli Studi di Salerno
 Programming language used is C with OpenMPI.
 The execution is done on a Cluster with EC2 machines (AWS services).
 
-<b>Problem Description</b> 
+<b>Problem Description</b> </br>
 The word count is the number of words in a document or passage of text. Word
 counting may be needed when a text is required to stay within specific numbers of words. This may
 particularly be the case in academia, legal proceedings, journalism, and advertising. Word count is
@@ -28,7 +28,7 @@ The MASTER process just needs to gather up all this information. Note that there
 words between processes. The master should create a CSV formatted file with the words and
 frequencies ordered.
 
-<b>Notes<b>
+<b>Notes</b>
 The hard part of the problem concerns to split equally the computation among the processors. For
 instance, if we split the files between processors, we cannot have a good partitioning scheme because
 some files must be bigger and bigger than other files. A good partitioning scheme must consider the

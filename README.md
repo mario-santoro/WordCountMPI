@@ -14,7 +14,7 @@ generally used for English. <br><br>
 We will be doing a version of map-reduce using MPI to perform word counting over a large number of
 files.<br>
 There are three steps for this process:
-<ol>
+<ul>
 <li>the MASTER node reads the file list (or a directory), which will contain the names of all the files that
 are to be counted. Note that only 1 of your processes should read the files list. Then each of the
 processes should receive their portion of the file from the MASTER process. Once a process has
@@ -28,7 +28,7 @@ counting, keeping track of the frequency each word found in the files occurs. We
 The MASTER process just needs to gather up all this information. Note that there will be duplicate
 words between processes. The master should create a CSV formatted file with the words and
   frequencies ordered.</li>
-  </ol>
+  </ul>
 <br>
 <b>Notes</b><br>
 The hard part of the problem concerns to split equally the computation among the processors. For

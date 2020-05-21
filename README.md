@@ -1,5 +1,6 @@
 # MPI
 Message Passing Interface (MPI) is a standardized and portable message-passing standard designed by a group of researchers from academia and industry to function on a wide variety of parallel computing architectures. The standard defines the syntax and semantics of a core of library routines useful to a wide range of users writing portable message-passing programs in C, C++, and Fortran. There are several well-tested and efficient implementations of MPI, many of which are open-source or in the public domain. These fostered the development of a parallel software industry, and encouraged development of portable and scalable large-scale parallel applications.
+For the scripts and tutorial to install OpenMPI and OpenMP on a Ubuntu Linux click <a href="https://github.com/spagnuolocarmine/ubuntu-openmpi-openmp">here</a>.
 
 # Amazon EC2
 Amazon Elastic Compute Cloud (Amazon EC2) is a web service that provides secure and scalable computing functionality in the cloud. It is designed to make web-scale cloud computing easier for developers. Through the intuitive Web service installation of Amazon EC2, functionality can be obtained and configured simply and immediately. The user has complete control of their IT resources, which can be run in Amazon's highly efficient computing environment.

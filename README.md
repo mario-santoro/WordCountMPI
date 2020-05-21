@@ -41,3 +41,12 @@ The hard part of the problem concerns to split equally the computation among the
 instance, if we split the files between processors, we cannot have a good partitioning scheme because
 some files must be bigger and bigger than other files. A good partitioning scheme must consider the
 number of words in each file, and split according to this value.
+
+# Instructions for uploading the project
+<ul>
+<li> keep the "file" directory in the same path as the wordCounter.c file; </li>
+  <li> compile and run on the terminal. </li>
+  </ul>
+<br>
+  <b>Notes:</b><br>
+  It is possible to increment words in files, but the word limit is set to 300.000.

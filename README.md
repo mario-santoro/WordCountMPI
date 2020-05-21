@@ -42,8 +42,9 @@ instance, if we split the files between processors, we cannot have a good partit
 some files must be bigger and bigger than other files. A good partitioning scheme must consider the
 number of words in each file, and split according to this value.
 
-# Instructions for uploading the project
+# Instructions for use locally  
 <ul>
+  <li> uploading the project;</li>
 <li> keep the "file" directory in the same path as the WordCounter.c file; </li>
   <li> compile and run on the terminal. </li>
   </ul>

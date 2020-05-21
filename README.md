@@ -44,7 +44,7 @@ number of words in each file, and split according to this value.
 
 # Instructions for uploading the project
 <ul>
-<li> keep the "file" directory in the same path as the wordCounter.c file; </li>
+<li> keep the "file" directory in the same path as the WordCounter.c file; </li>
   <li> compile and run on the terminal. </li>
   </ul>
 <br>

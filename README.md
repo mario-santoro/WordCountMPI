@@ -56,5 +56,5 @@ number of words in each file, and split according to this value.
   # Instructions for use distributed
   <b> AWS configure </b>
   <ul>
-  <ol>Trovare "credential" su AWS e copiare le credenziali nella cartella ".aws" -> credential file (cartella nascosta)</ol>
+  <li>Trovare "credential" su AWS e copiare le credenziali nella cartella ".aws" -> credential file (cartella nascosta)</li>
   </ul>

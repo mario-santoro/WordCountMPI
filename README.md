@@ -52,3 +52,9 @@ number of words in each file, and split according to this value.
 <br>
   <b>Notes:</b><br>
   It is possible to increment words in files, but the word limit is set to 300.000.
+  
+  # Instructions for use distributed
+  <b> AWS configure </b>
+  <ul>
+  <lu>Trovare credential su aws e copiare le credenziali nella cartella .aws credential (cartella nascosta)</lu>
+  </ul>

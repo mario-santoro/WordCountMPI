@@ -44,17 +44,17 @@ some files must be bigger and bigger than other files. A good partitioning schem
 number of words in each file, and split according to this value.
 
 # Instructions for use locally  
-<ul>
+<ol>
   <li> uploading the project;</li>
 <li> it is possible to add ".txt" files in the "file" directory, they can have any name of your choice, but it is not possible to change the name to the "file" directory and it must stay in the same path as the "WordCounter.c" file; </li>
   <li> compile and run on the terminal. </li>
-  </ul>
+  </ol>
 <br>
   <b>Notes:</b><br>
   It is possible to increment words in files, but the word limit is set to 300.000.
   
   # Instructions for use distributed
   <b> AWS configure </b>
-  <ul>
+  <ol>
   <li>Trovare "credential" su AWS e copiare le credenziali nella cartella ".aws" -> credential file (cartella nascosta)</li>
-  </ul>
+  </ol>

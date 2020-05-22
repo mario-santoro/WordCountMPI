@@ -10,14 +10,15 @@
 #define LENGTH 30000 //al massimo 1000 parole
 #define CHARLENGTH 20 //non esistono parole più lunghe di 20 caratteri
 char PATHNAME[MAXPATHLEN];
-
+//struttura che identifica la singola parola e la sua frequenza (o ricorrenza) 
 typedef struct Word
 {
     char name[CHARLENGTH]; 
     int frequenza;
 } Word;
 
-//funzione utile per aprire i file nella directory e salvare le parole in un array bidimensionale
+//funzione utile per aprire i file nella directory "file" e salvare le parole in un array bidimensionale. 
+//Nota: i file possono avere qualsiasi nome nella cartella "file" e possono anche essere creati altri, ma non può cambiare il nome e la posizione della cartella "file"
 int RiempiArray(char array[LENGTH][CHARLENGTH])
 {
     char ch;
@@ -28,12 +29,13 @@ int RiempiArray(char array[LENGTH][CHARLENGTH])
     struct dirent *dp;
     char path[MAXPATHLEN];
 
-    //Recuperare pathname della cartella con i file
+    //getwd restituisce un percorso file assoluto che rappresenta la directory di lavoro corrente.
     if (!getwd(PATHNAME))
     {
         printf("Error getting path\n");
         exit(0);
     }
+    //concateno il percorso della directory corrente con /file per indicare dove recuperare i file
     strcat(PATHNAME, "/file/");
 
     /*prendo i file dalla cartella e apro i file per l'assegnamento dell'array*/
@@ -134,7 +136,6 @@ int calcolaFrequenza(char array[LENGTH][CHARLENGTH], int row, Word words[LENGTH]
         // quindi si aggiunge una nuova parola con frequenza 1 nella struttura
         if (bool == 0 && strcmp(array[i],"")!=0)
         {
-
             strcpy(words[size].name, array[i]);
             words[size].frequenza = 1;
             size++;          
@@ -219,6 +220,18 @@ void stampaStruttura(Word *words, int myRank)
     }
 }
 
+//funzione che crea il file csv con i risultati
+void creaCSV(Word w[LENGTH], int size){
+    //creo file csv per salvare i risultati
+    FILE *fpcsv;
+    fpcsv = fopen("risultati.csv", "w+");
+    fprintf(fpcsv, "OCCORRENZA,PAROLA");
+    for (int t = 0; t < size; t++)
+    {
+        fprintf(fpcsv, "\n%s,%d", w[t].name, w[t].frequenza);
+    }
+    fclose(fpcsv);
+}
 
 int main(int argc, char *argv[])
 {
@@ -255,8 +268,7 @@ int main(int argc, char *argv[])
     //per inviare la struttura come nuovo tipo
     MPI_Type_create_struct(2, blockcounts, offsets, oldtypes, &st);
     MPI_Type_commit(&st);
-
-
+    //avvio calcolo tempo
     clock_t begin = clock();
     if (myRank == 0)
     {
@@ -286,20 +298,13 @@ int main(int argc, char *argv[])
             unisciResult(tmp, count, w);
         }
         size2=contaStrutt(w);
+       //creao file csv
+       creaCSV(w, size2);
        
-        //creo file csv per salvare i risultati
-        FILE *fpcsv;
-        fpcsv = fopen("risultati.csv", "w+");
-        fprintf(fpcsv, "OCCORRENZA,PAROLA");
-        for (int t = 0; t < size2; t++)
-        {
-            fprintf(fpcsv, "\n%s,%d", w[t].name, w[t].frequenza);
-        }
-        fclose(fpcsv);
-         //calcolo e stampo il tempo di computazione
-    clock_t end = clock();
-    double time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
-    printf("execution time = %lf\n",time_spent);
+        //calcolo e stampo il tempo di computazione
+        clock_t end = clock();
+        double time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
+        printf("execution time = %lf\n",time_spent);
     }
     else
     {

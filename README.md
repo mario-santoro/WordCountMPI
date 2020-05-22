@@ -46,7 +46,7 @@ number of words in each file, and split according to this value.
 # Instructions for use locally  
 <ol>
   <li> uploading the project;</li>
-<li> it is possible to add ".txt" files in the "file" directory, they can have any name of your choice, but it is not possible to change the name to the "file" directory and it must stay in the same path as the "WordCounter.c" file; </li>
+<li> it is possible to add ".txt" files in the "file" folder, they can have any name of your choice, but it is not possible to change the name to the "file" folder and it must stay in the same path as the "WordCounter.c" file; </li>
   <li> compile and run on the terminal. </li>
   </ol>
 <br>
@@ -56,5 +56,10 @@ number of words in each file, and split according to this value.
   # Instructions for use distributed
   <b> AWS configure </b>
   <ol>
-  <li>Trovare "credential" su AWS e copiare le credenziali nella cartella ".aws" -> "credential.txt" file (cartella nascosta)</li>
+  <li>Find "credential" on AWS copy and paste the credentials to the folder ".aws" -> "credential.txt" file (it's a hidden folder);</li>
+  <li>AWS create security group: $aws ec2 create-security-group --group-name <i><name_security_group></i> --description "My security group". <br>Then going to AWS console on security group, we add in in-bound and out-bound rules with this selection <i>"All-Traffic"</i> and <i>"SSH"</i> with source <i>"anywhere"</i>;</li>
+  <li> create key-pair: $aws ec2 create-key-pair --key-name <i><name_key></i> --query 'KeyMaterial' --output text > <i><name_key></i>.pem <br>then change the permission of the key.pem in that way -> $sudo chmod 400 <i><name_key></i>.pem</li>
+    <li>You can easly bring the ami number from AWS dashboard: click "launch instance" and then choose your machine e pick the first ami number, it should be like this: <i>ami-085925f297f89fce1</i></li>
+    <li>Create instance EC2: use the following command, to create EC2 instance: $aws ec2 run-instances --image-id <i>ami_number</i> --count <i># of instance</i> --instance-type <i>instance_type</i> --key-name <i><name_key></i> --security-groups  <i><name_security_group></i>;</li>
+      <li>You can connect to the instance. Before connecting to the instance you should pick the name of the instance (it should be like this: <i>ubuntu@ec2-100-26-234-191.compute-1.amazonaws.com</i>) with the following command: $aws ec2 describe-instances <br> Now you can easly connect with the following command: $ssh -i "<i><name_key></i>.pem" <i><name_of_the_instance></i> </li>
   </ol>

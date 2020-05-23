@@ -59,9 +59,15 @@ number of words in each file, and split according to this value.
     <li>Find &quot;credential&quot; on AWS copy and paste the credentials to the folder &quot;.aws&quot; -&gt; &quot;credential.txt&quot; file (it&#39;s a hidden folder);</li>
     <li>AWS create security group: $aws ec2 create-security-group --group-name <em>&lt;name_of_security_group&gt;</em> --description &quot;My security group&quot;.<br>Then going to AWS console on security group, we add in in-bound and out-bound rules with this selection <em>&quot;All-Traffic&quot;</em> and <em>&quot;SSH&quot;</em> with source <em>&quot;anywhere&quot;</em>;</li>
     <li>create key-pair: $aws ec2 create-key-pair --key-name <em>&lt;name_of_key&gt;</em> --query &#39;KeyMaterial&#39; --output text &gt; <em>&lt;name_of_key&gt;</em>.pem<br>then change the permission of the key.pem in that way -&gt; $sudo chmod 400 <em>&lt;name_of_key&gt;</em>.pem</li>
+</ol>
+<p><strong>&nbsp;Launch and connect instance &nbsp;</strong></p>
+<ol>
     <li>You can easly bring the ami number from AWS dashboard: click &quot;<em>launch instance&quot;</em> and then choose your machine e pick the first ami number, it should be like this: <em>ami-085925f297f89fce1</em></li>
     <li>Create instance EC2: use the following command, to create EC2 instance: $aws ec2 run-instances --image-id <em>&lt;</em><em>ami_number</em><em>&gt;</em> --count <em>&lt;</em><em># of instance</em><em>&gt;&nbsp;</em>--instance-type <em>&lt;</em><em>instance_type</em>&gt; --key-name <em>&lt;name_of_key&gt;</em> --security-groups <em>&lt;name_of_security_group&gt;</em>;</li>
     <li>You can connect to the instance. Before connecting to the instance you should pick the name of the instance (it should be like this: <em>ubuntu@ec2-100-26-234-191.compute-1.amazonaws.com</em>) with the following command: $aws ec2 describe-instances<br>Now you can easly connect with the following command: $ssh -i &quot;&lt;<em>name_of_key&gt;</em>.pem&quot; <em>&lt;name_instance&gt;</em></li>
+</ol>
+<p><strong>&nbsp;Install OpenMPI and run program &nbsp;</strong></p>
+<ol>
     <li>install openmpi on all machines with the following command:$ssh -i &lt;<em>name_of_key&gt;</em>.pem <em>&lt;name_instance&gt;</em> &#39;bash -s&#39; &lt; mpi/ubuntu-openmpi-openmp/install.sh</li>
     <li>copy the key on all the machines with: $scp -i &quot;&lt;<em>name_of_key&gt;</em>.pem&quot; &lt;<em>name_of_key&gt;</em>.pem <em>&lt;name_instance&gt;</em>:~</li>
     <li>Copy the program executable to the master and all slaves with the following command: $scp -i &quot;&lt;<em>name_of_key&gt;</em>.pem&quot; <em>&lt;path_program&gt;&nbsp;</em><em>&lt;name_instance&gt;</em>:~</li>

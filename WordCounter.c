@@ -151,14 +151,14 @@ void partitioning(int taglia, int p, int *partitioning)
 {
     //dimensione array modulo numero di processi otteniamo il resto
     int modulo = taglia % p;
+      //inizializzo l'array con i valori (iniziali) uguali per tutti
+    for (int i = 0; i < p; i++)
+    {
+        partitioning[i] = taglia / p;
+    }
     //se il resto non è 0 
     if (modulo != 0)
-    {
-        //inizializzo l'array con i valori (iniziali) uguali per tutti
-        for (int i = 0; i < p; i++)
-        {
-            partitioning[i] = taglia / p;
-        }
+    {      
         int temp = 0;
         //finchè il resto non è zero viene smistato il valore tra le varie porzioni
         while (modulo != 0)
@@ -169,15 +169,8 @@ void partitioning(int taglia, int p, int *partitioning)
             modulo--;
         }
     }
-    //se il resto è 0 possiamo dividere in parti uguali la porzione da dare ai processi
-    else
-    {
-        for (int i = 0; i < p; i++)
-        {
-            partitioning[i] = taglia / p;
-        }
-    }
 }
+
 
 //completa e unifica i risultati di due struttura in un unica struttura: w2
 int unisciResult(Word w1[LENGTH], int sizeW1, Word w2[LENGTH])

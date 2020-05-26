@@ -7,7 +7,7 @@
 #include <dirent.h>
 #include <sys/param.h>
 #include <time.h>
-#define LENGTH 30000 //al massimo 1000 parole
+#define LENGTH 30000 //al massimo 30000 parole
 #define CHARLENGTH 20 //non esistono parole più lunghe di 20 caratteri
 char PATHNAME[MAXPATHLEN];
 //struttura che identifica la singola parola e la sua frequenza (o ricorrenza) 

@@ -56,7 +56,7 @@ number of words in each file, and split according to this value.
   </ol>
 <br>
   <b>Notes:</b><br>
-  It is possible to increment words in files, but the word limit is set to 30.000.
+  It is possible to increment words in files, but the word limit is set to 100.000.
   
   # Instructions for use distributed
 <p><strong>&nbsp;AWS configure&nbsp;</strong></p>

@@ -47,11 +47,16 @@ number of words in each file, and split according to this value.
 <ol>
   <li> uploading the project;</li>
 <li> it is possible to add ".txt" files in the "file" folder, they can have any name of your choice, but it is not possible to change the name to the "file" folder and it must stay in the same path as the "WordCounter.c" file; </li>
-  <li> compile and run on the terminal. </li>
+  <li> compile and run on the terminal with the following command:
+      <ul>
+        <li>$mpicc file_name.c -o exe_file</li>
+        <li>$mpirun -np p exe_file </li>
+       <ul>
+   </li>
   </ol>
 <br>
   <b>Notes:</b><br>
-  It is possible to increment words in files, but the word limit is set to 300.000.
+  It is possible to increment words in files, but the word limit is set to 30.000.
   
   # Instructions for use distributed
 <p><strong>&nbsp;AWS configure&nbsp;</strong></p>

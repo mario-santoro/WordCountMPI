@@ -7,7 +7,7 @@
 #include <dirent.h>
 #include <sys/param.h>
 #include <time.h>
-#define LENGTH 100500 //al massimo 100500 parole
+#define LENGTH 100000 //al massimo 100000 parole
 #define LBYTE 1000
 #define CHARLENGTH 20 //non esistono parole più lunghe di 20 caratteri
 char PATHNAME[MAXPATHLEN];

@@ -205,7 +205,7 @@ int splitByte(SizeByte byte[LBYTE], long taglia, ByteSplit sp[LBYTE], long *part
             //il valore già consumato dal processo corrente
             res += partitioning[rank]; //incremento il valore dei byte consumati in questa iterazione
             rank++;                    //rank successivo poichè ha consumato i byte che doveva
-            start = end;               //lo start start del processo successivo
+            start = end;               //lo start del processo successivo
             //diventa l'end (quindi dove si è fermato a consuamare byte) del processo corrente
             count = 0;                                  //count torna a 0 per il processo successivo
             if (partitioning[rank] == byte[i].sizeByte) // se  ciò che deve consumare il processo è strettamente uguale

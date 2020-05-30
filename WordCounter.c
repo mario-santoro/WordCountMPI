@@ -420,15 +420,14 @@ int main(int argc, char *argv[])
     }
     else
     {
-        ByteSplit tmp[LBYTE];
         int siz;
         MPI_Recv(&siz, 1, MPI_INT, 0, tag, MPI_COMM_WORLD, &status);  //ricevo la dimensione della struttura in arrivo nella recive succssive
-        MPI_Recv(&tmp, siz, st, 0, tag + 1, MPI_COMM_WORLD, &status); //ricevo la struttura contente le informazioni necessarie per consuamre byte nei file
+        MPI_Recv(&sp, siz, st, 0, tag + 1, MPI_COMM_WORLD, &status); //ricevo la struttura contente le informazioni necessarie per consuamre byte nei file
         char array[LENGTH][CHARLENGTH];
         int index = 0;
         for (int i = 0; i < siz; i++)
         {
-            index = riempioArray(array, tmp[i], index); //riempio l'array tante volte quanti sono i file da cui il processo corrente deve attingere i byte
+            index = riempioArray(array, sp[i], index); //riempio l'array tante volte quanti sono i file da cui il processo corrente deve attingere i byte
         }
         Word words[LENGTH];
         int size2 = calcolaFrequenza(array, index, words);      //calcola la frequenza delle parole contenute nella porzione di array inviatogli

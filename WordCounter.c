@@ -7,7 +7,7 @@
 #include <dirent.h>
 #include <sys/param.h>
 #include <time.h>
-#define LENGTH 100000 //al massimo 100000 parole
+#define LENGTH 120000 //al massimo 100000 parole
 #define LBYTE 1000
 #define CHARLENGTH 20 //non esistono parole più lunghe di 20 caratteri
 char PATHNAME[MAXPATHLEN];
@@ -37,7 +37,7 @@ typedef struct ByteSplit
 void creaCSV(Word w[LENGTH], int size)
 {
     FILE *fpcsv;
-    fpcsv = fopen("../risultati.csv", "w+");
+    fpcsv = fopen("/home/pcpc/risultati.csv", "w+"); //in locale solo risultati.csv
     fprintf(fpcsv, "OCCORRENZA,PAROLA");
     for (int t = 0; t < size; t++)
     {
@@ -218,14 +218,14 @@ int splitByte(SizeByte byte[LBYTE], long taglia, ByteSplit sp[LBYTE], long *part
             send[rank] = count + 1;
             //copio il nome del file nella struttura sp
             strcpy(sp[j].nameFile, byte[i].file);
-            /*l'end in questo caso la fine è il valore che doveva 
+            /*l'end è l'inizio + il valore che doveva 
             consumare il processo (-1)*/
-            end = partitioning[rank] - 1;
+            end = start + partitioning[rank] - 1;
             //setto dove il processo deve finire di consumare byte
             sp[j].end = end;
             /*modifico il valore della dimensione di byte del file sottraendo
             il valore già consumato dal processo corrente*/
-            byte[i].sizeByte = byte[i].sizeByte - partitioning[rank];
+            byte[i].sizeByte -= partitioning[rank];
             //incremento il valore dei byte consumati in questa iterazione
             res += partitioning[rank];
             /*si incrementa rank, si passa al processo successivo 
@@ -487,7 +487,7 @@ int main(int argc, char *argv[])
         printf("execution time = %lf\n", time_spent);
     }
     else
-    {       
+    {
         int siz;
         //ricevo la dimensione della struttura in arrivo nella recive succssive
         MPI_Recv(&siz, 1, MPI_INT, 0, tag, MPI_COMM_WORLD, &status);

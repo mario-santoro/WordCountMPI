@@ -47,6 +47,7 @@ number of words in each file, and split according to this value.
 <ol>
   <li> uploading the project;</li>
 <li> it is possible to add ".txt" files in the "file" folder, they can have any name of your choice, but it is not possible to change the name to the "file" folder and it must stay in the same path as the "WordCounter.c" file; </li>
+  <li> change path of results in: "risultati.csv"
   <li> compile and run on the terminal with the following command:
       <ul>
         <li>$mpicc file_name.c -o exe_file</li>

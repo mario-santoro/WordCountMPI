@@ -77,7 +77,7 @@ number of words in each file, and split according to this value.
     <li>install openmpi on all machines with the following command:$ssh -i &lt;<em>name_of_key&gt;</em>.pem <em>&lt;name_instance&gt;</em> &#39;bash -s&#39; &lt; mpi/ubuntu-openmpi-openmp/install.sh</li>
     <li>copy the key on all the machines with: $scp -i &quot;&lt;<em>name_of_key&gt;</em>.pem&quot; &lt;<em>name_of_key&gt;</em>.pem <em>&lt;name_instance&gt;</em>:~</li>
     <li>Copy the program executable to the master and all slaves with the following command: $scp -i &quot;&lt;<em>name_of_key&gt;</em>.pem&quot; <em>&lt;path_program&gt;&nbsp;</em><em>&lt;name_instance&gt;</em>:~</li>
-    <li>Log in to the pcpc user from the master, and run the following command $mpirun -np <em>&lt;#of_instance&gt;</em> --host <em>&lt;name_instance1&gt;</em>,<em>&lt;name_instance2&gt;,...,&lt;name_instance_n&gt;</em>
+    <li>Log in to the pcpc user from the master, and run the following command $mpirun -np <em>&lt;#of_instance&gt;</em> --host <em>&lt;ip_instance1&gt;</em>,<em>&lt;ip_instance2&gt;,...,&lt;ip_instance_n&gt;</em>
         <p><br></p>
     </li>
 </ol>

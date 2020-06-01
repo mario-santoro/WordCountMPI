@@ -1,6 +1,6 @@
 | Progetto  | Nome e Cognome | Data di consegna |
 |:---------:|:--------------:|:----------------:|
-| WordCount | Mario Santoro  | 01/06/2020       |
+| WordCount | Mario Santoro  | 02/06/2020       |
 
 ## Descrizione della soluzione
 
@@ -18,101 +18,14 @@ La soluzione trovata si compone nelle fasi seguenti:
 
 ## Codice
 
----
+--- 
+
+Per prima cosa il processo MASTER chiama la funzione  *CalcolaByte(SizeByte byte[LBYTE])*  per inserire nell'array di *SizeByte* (una struttura creata) il nome del file e la sua dimensione in byte. Restituisce la dimensione totale dei byte (tutti i file).  
 
 ```c
-#include <stdio.h>
-#include <mpi.h>
-#include <string.h>
-#include <stdlib.h>
-#include <sys/types.h>
-#include <sys/dir.h>
-#include <dirent.h>
-#include <sys/param.h>
-#include <time.h>
-#define LENGTH 120000 //al massimo 120000 parole
-#define LBYTE 1000
-#define CHARLENGTH 20 //non esistono parole più lunghe di 20 caratteri
-char PATHNAME[MAXPATHLEN];
-//struttura che identifica la singola parola e la sua frequenza (o ricorrenza)
-typedef struct Word
-{
-    char name[CHARLENGTH];
-    int frequenza;
-} Word;
-//Struttura con il nome del file e la sua dimensione
-typedef struct SizeByte
-{
-    char file[CHARLENGTH];
-    long sizeByte;
-} SizeByte;
-/*struttura che per un dato rank identifica da quale byte partire(start)
- e dove finire (end) in un dato file(nameFile)*/
-typedef struct ByteSplit
-{
-    int rank;
-    char nameFile[CHARLENGTH];
-    long start;
-    long end;
-} ByteSplit;
-
-//funzione che crea il file csv con i risultati
-void creaCSV(Word w[LENGTH], int size)
-{
-    FILE *fpcsv;
-    fpcsv = fopen("/home/pcpc/risultati.csv", "w+"); //in locale solo risultati.csv
-    fprintf(fpcsv, "OCCORRENZA,PAROLA");
-    for (int t = 0; t < size; t++)
-    {
-        fprintf(fpcsv, "\n%s,%d", w[t].name, w[t].frequenza);
-    }
-    fclose(fpcsv);
-}
-
-/*funzione che calcola la frequenza delle parole in una porzione di array 
-(row è la dimensione dell'array) inserendo nella struttura Word la parola
- e la sua frequenza infine restituisce la dimensione della struttura*/
-int calcolaFrequenza(char array[LENGTH][CHARLENGTH], int row, Word words[LENGTH])
-{
-    //setto flag a 0
-    int bool = 0;
-    //inserisco primo elemento dell'array nella struttura con frequenza 1
-    strcpy(words[0].name, array[0]);
-    words[0].frequenza = 1;
-    int size = 1;
-    //scorro tutto l'array parola per parola
-    for (int i = 1; i < row; i++)
-    {
-        //scorro la struttura
-        for (int j = 0; j < size; j++)
-        {
-            /*controllo se è gia presente la parola nella struttura,
-            nel caso aumento la frequenza della parola e setto il flag a 1,
-             infine posso uscire dal ciclo che scorre la struttura*/
-            if (strcmp(array[i], words[j].name) == 0)
-            {
-                bool = 1;
-                words[j].frequenza++;
-                break;
-            }
-        }
-        /*se il flag è ancora a 0 non ho trovato l'occorrenza della parola
-         nella struttura quindi si aggiunge una nuova parola con 
-         frequenza 1 nella struttura*/
-        if (bool == 0)
-        {
-            strcpy(words[size].name, array[i]);
-            words[size].frequenza = 1;
-            size++;
-        }
-        bool = 0;
-    }
-
-    return size;
-}
 /*funzione che calcola in una struttura SizeByte la dimensione di ogni file 
 e restituisce la dimensione (di byte) totale per tutti i file*/
-int CalcolaByte(SizeByte byte[LBYTE])
+long CalcolaByte(SizeByte byte[LBYTE])
 {
     char ch;
     int j = 0;
@@ -173,47 +86,37 @@ int CalcolaByte(SizeByte byte[LBYTE])
     closedir(dirp);
     return size;
 }
+```
 
-/*funzione che in input ha la taglia totale dei byte (di tutti i file) e la
-suddivide equamente per ogni processo (p processi totali) in un array partitioning 
-(di long passato per argomento) in cui ogni posizione identifica quanti byte 
-dovrà "consumare" il processo i-esimo*/
-void partitioning(long taglia, int p, long *partitioning)
-{
-    //dimensione array modulo numero di processi otteniamo il resto
-    int resto = taglia % p;
-    //inizializzo l'array con i valori (iniziali) uguali per tutti
-    for (int i = 0; i < p; i++)
-    {
-        partitioning[i] = taglia / p;
-    }
-    //se il resto non è 0
-    if (resto != 0)
-    {
+Successivamente una funzione *partitioning(long taglia, int p, long *partitioning)* divide la taglia totale ottenuta dalla funzione precedente per il numero di processi per stabilire quanti byte ogni processo dovrà "consumare", in caso di resto assegna equamente a ogni processo la somma rimasta in questo modo:
 
-        int temp = 0;
-        /*finchè il resto non è zero viene smistato il valore tra le varie porzioni*/
-        while (resto != 0)
-        {
-            /*il tmp deve essere modulo p (se resto > di p si
-             andrebbe in un elemento inesistente)*/
+```c
+  int temp = 0;
+  while (resto != 0)
+        {            
             partitioning[temp % p] = partitioning[temp % p] + 1;
             temp++;
             resto--;
         }
-    }
-}
+```
 
-/*funzione che prende in input: 
-- array di SizeByte la struttura contente il nome dei file e la loro dimensione;
-- long taglia contente la dimensione totale (in Byte) di tutti i file;
-- array di ByteSplit una struttura che verrà riempita con le informazioni necessarie
-ai singoli processi per lo split dei byte tra i file divide equamente le parole dell'array tra i processi; 
-- partitioning array di long contente la somma dei byte che ogni singolo processo deve consumare;
-- l'array di interi send è utile per calcolare quante celle della struttura ByteSplit 
-dovrà essere inviato a ogni singolo processo, poichè ogni cella identifica es: 
-index struttura 0 processo 0 "file1.txt" da byte 0 a 100, index struttura 1 processo 
-0 "file2.txt" da byte 0 a 30, quindi send[0] sarà uguale a 2*/
+ A questo punto il MASTER chiama la funzione *splitByte(SizeByte byte[LBYTE], long taglia, ByteSplit sp[LBYTE], long *partitioning, int *send)*, questa funzione si occupa di riempire un array di *ByteSplit*, una nuova struttura, contenente le informazioni da inviare agli SLAVE, la struttura in questione, è strutturata come nell'esempio che segue:
+
+| rank | nameFIle  | start | end  |
+|:----:|:---------:|:-----:|:----:|
+| 0    | file.txt  | 0     | 899  |
+| 1    | file.txt  | 900   | 1300 |
+| 1    | file1.txt | 0     | 499  |
+| 2    | file1.txt | 500   | 1000 |
+| ...  | ...       | ...   | ...  |
+
+start indica dove il rank deve iniziare a "consumare" byte nel file ed end dove finire.
+
+La funzione riempirà anche un array di interi che ogni posizione inidca il processo, mentre il contenuto indica quante righe della struttura mandare al processo i-esimo, es: send[1]= 2 perchè al rank 1 dovranno essere inviate due righe della struttura.
+
+La funzione è implementata nel modo seguente (spiegazioni nei commenti):
+
+```c
 int splitByte(SizeByte byte[LBYTE], long taglia, ByteSplit sp[LBYTE], long *partitioning, int *send)
 {
     int i = 0; //indice che scorre struttura SizeByte byte
@@ -295,78 +198,44 @@ int splitByte(SizeByte byte[LBYTE], long taglia, ByteSplit sp[LBYTE], long *part
 
     return j;
 }
+```
 
-/*completa e unifica i risultati di due struttura Word (parola e frequenza) 
-in un unica struttura: w2, restituisce la dimensione della struttura w2*/
-int unisciResult(Word w1[LENGTH], int sizeW1, Word w2[LENGTH], int sizeW2)
-{
-    int bool = 0;
+Adesso il MASTER è pronto a inviare agli SLAVE le informazioni, inviandogli col tag 0 la dimensione della struttura in arrivo, mentre la seconda send con tag 1 la locazione di memoria che è stata assegnata per essere computata da quel processo:
 
-    for (int i = 0; i < sizeW1; i++)
-    {
-        for (int j = 0; j < sizeW2; j++)
+```c
+int index = send[0];
+        for (int i = 1; i < p; i++)
         {
-            /*se la parola della prima struttura è già presente nella seconda
-            allora viene soltanto fatta l'addizione delle 2 frequenze*/
-            if (strcmp(w1[i].name, w2[j].name) == 0)
-            {
-                w2[j].frequenza = w2[j].frequenza + w1[i].frequenza;
-                bool = 1;
-            }
+            //prima send che contiene la lunghezza della struttura in invio
+            MPI_Send(&send[i], 1, MPI_INT, i, tag, MPI_COMM_WORLD);
+            //seconda send con la struttura, quanto inviare è stabilito in row[i]
+            MPI_Send(&sp[index], row[i], st, i, tag + 1, MPI_COMM_WORLD);
+            //incremento index per il processo successivo
+            index += row[i];
         }
-        /*se il flag è 0 (e la parola non deve essere vuota) la parola non è presente
-         nella seconda struttura quindi viene aggiunta la parola 
-         e la frequenza trovata*/
-        if (bool == 0 && strcmp(w1[i].name, "") != 0)
-        {
-            strcpy(w2[sizeW2].name, w1[i].name);
-            w2[sizeW2].frequenza = w1[i].frequenza;
-            sizeW2++;
-        }
-        bool = 0;
-    }
-    return sizeW2;
-}
-/*
-funzione che prende in input:
-- un array bidimensionale di caratteri che conterrà le parole che dovrà computare il processo;
-- ByteSplit la struttura che per un dato rank identifica da quale byte partire (start) 
-e dove finire (end) in un dato file(nameFile);
-- start è da dove iniziare a scorrere l'indice dell'array, passato per argomento 
-poichè la funzione può essere rieseguita più volte dal processo(tante quante 
-sono i file da cui attingono i byte) e quindi poter aggiungere allo stesso array 
-altre parole per l'iterazione successiva.
-Viene restituito lo stesso start che è incrementato durante la funzione e diventa la nuova size dell'array
-*/
-int riempioArray(char array[LENGTH][CHARLENGTH], ByteSplit sp, int start)
-{
-    FILE *fp;
-    char path[MAXPATHLEN];
-    /*getwd restituisce un percorso file assoluto che 
-    rappresenta la directory di lavoro corrente.*/
-    if (!getwd(PATHNAME))
-    {
-        printf("Error getting path\n");
-        exit(0);
-    }
-    /*concateno il percorso della directory corrente 
-    con /file per indicare dove recuperare i file*/
-    strcat(PATHNAME, "/file/");
-    strcpy(path, PATHNAME);
-    //concateno con il nome del file
-    strcat(path, sp.nameFile);     
-    if ((fp = fopen(path, "rt")) == NULL)
-    {
-        printf("Errore nell'apertura del file'");
-        exit(1);
-    }
+```
+
+Gli slave ricevono le informazioni con due recive:
+
+```c
+int siz;
+        //ricevo la dimensione della struttura in arrivo nella recive succssive
+        MPI_Recv(&siz, 1, MPI_INT, 0, tag, MPI_COMM_WORLD, &status);
+        /*ricevo la struttura contente le informazioni 
+        necessarie per consuamre byte nei file*/
+        MPI_Recv(&sp, siz, st, 0, tag + 1, MPI_COMM_WORLD, &status);
+```
+
+A questo punto sia il MASTER che gli SLAVE richiamano una funzione (tante volte quanti sono i file da cui attingono i byte) per recuperare le parole loro assegnate, la funzione è  *riempioArray(char array[LENGTH][CHARLENGTH], ByteSplit sp, int start)*, in questa funzione viene aperto il file contenuto nella struttura passata come argomento. Dopodichè ci si posiziona sul byte di partenza con la *fseeko* e si inizia a scorrere il file carattere per carattere, saltando (solo se non si parte dal byte 0) la prima parola destinata al processo precedente, infatti un flag viene settato a 1 solo se si arriva al \n della prima parola, mentre per la fine dal while si può uscire quando si è arrivato al byte di fine e senza spezzare la parola quindi continua fino al \n. Ecco la parte saliente della funzione:
+
+```c
     int j = 0; //scorre i caratteri
     /*posizionarsi su un byte specifico all'interno del 
     file per iniziare a consumare byte*/
     fseeko(fp, sp.start, SEEK_SET);
     char ch;
     int flag = 0;
-    long sizech = sp.end; //dove terminare nel file
+    long sizech= sp.end; //dove terminare nel file
     int count = sp.start; //dove iniziare
     /*Il while deve continuare finchè il valore di inizio "count" arriva 
     all'end "sizech" o finchè è diverso \n per non avere parole tagliate*/
@@ -407,144 +276,55 @@ int riempioArray(char array[LENGTH][CHARLENGTH], ByteSplit sp, int start)
         count++;
     }
     return start;
-}
 
-int main(int argc, char *argv[])
+```
+
+Una volta riempito l'array con le parole i processi possono calcolare le parole e le loro occorrenze. Compito assegnato alla funzione *calcolaFrequenza(char array[LENGTH][CHARLENGTH], int row, Word words[LENGTH])* che riempie l'array di *Word*, struttura per immagazzianare le parole e le occorrenze, nel seguente modo:
+
+```c
+int calcolaFrequenza(char array[LENGTH][CHARLENGTH], int row, Word words[LENGTH])
 {
-    int myRank, p;
-    MPI_Status status;
-    MPI_Request req;
-    MPI_Init(&argc, &argv);
-    MPI_Comm_size(MPI_COMM_WORLD, &p);
-    MPI_Comm_rank(MPI_COMM_WORLD, &myRank);
-    int tag = 0;
-    //Creo la struttura ByteStruct come nuovo tipo MPI per passarlo con send e recive
-    MPI_Datatype st, oldtypes[3];
-    int blockcounts[3];
-    MPI_Aint offsets[3];
-    //definisco i valori della nuovo tipo MPI
-    offsets[0] = offsetof(ByteSplit, rank);
-    oldtypes[0] = MPI_INT;
-    blockcounts[0] = 1;
-
-    offsets[1] = offsetof(ByteSplit, nameFile);
-    oldtypes[1] = MPI_CHAR;
-    blockcounts[1] = 20;
-
-    offsets[2] = offsetof(ByteSplit, start);
-    oldtypes[2] = MPI_LONG;
-    blockcounts[2] = 2;
-    //per creare la struttura come nuovo tipo
-    MPI_Type_create_struct(3, blockcounts, offsets, oldtypes, &st);
-    MPI_Type_commit(&st);
-
-    //Creo la struttura Word come nuovo tipo MPI per passarlo con send e recive
-    MPI_Datatype w, oldtypes1[2];
-    int blockcounts1[2];
-    MPI_Aint offsets1[2];
-    //definisco i valori del nuovo tipo MPI
-    offsets1[0] = offsetof(Word, name);
-    oldtypes1[0] = MPI_CHAR;
-    blockcounts1[0] = 20;
-
-    offsets1[1] = offsetof(Word, frequenza);
-    oldtypes1[1] = MPI_INT;
-    blockcounts1[1] = 1;
-    //per inviare la struttura come nuovo tipo
-    MPI_Type_create_struct(2, blockcounts1, offsets1, oldtypes1, &w);
-    MPI_Type_commit(&w);
-
-    SizeByte byte[LBYTE];
-    ByteSplit sp[LBYTE];
-    //avvio calcolo tempo
-    clock_t begin = clock();
-    if (myRank == 0)
+    //setto flag a 0
+    int bool = 0;
+    //inserisco primo elemento dell'array nella struttura con frequenza 1
+    strcpy(words[0].name, array[0]);
+    words[0].frequenza = 1;
+    int size = 1;
+    //scorro tutto l'array parola per parola
+    for (int i = 1; i < row; i++)
     {
-        /*"size" contiene la lunghezza totale in byte dei file, mentre 
-        in "byte" le informazioni: nome file e size in Byte*/
-        long size = CalcolaByte(byte);     
-        long part[p];
-        int row[p];
-        //suddivisione della dimensione totale dei byte per i processi
-        partitioning(size, p, part);
+        //scorro la struttura
+        for (int j = 0; j < size; j++)
+        {
+            /*controllo se è gia presente la parola nella struttura,
+            nel caso aumento la frequenza della parola e setto il flag a 1,
+             infine posso uscire dal ciclo che scorre la struttura*/
+            if (strcmp(array[i], words[j].name) == 0)
+            {
+                bool = 1;
+                words[j].frequenza++;
+                break;
+            }
+        }
+        /*se il flag è ancora a 0 non ho trovato l'occorrenza della parola
+         nella struttura quindi si aggiunge una nuova parola con 
+         frequenza 1 nella struttura*/
+        if (bool == 0)
+        {
+            strcpy(words[size].name, array[i]);
+            words[size].frequenza = 1;
+            size++;
+        }
+        bool = 0;
+    }
 
-        //riempio la struttura ByteSplit sp con le informazioni da inviare ai processi
-        int siz = splitByte(byte, size, sp, part, row);
-        char array[LENGTH][CHARLENGTH];
-        int index = row[0];
-        for (int i = 1; i < p; i++)
-        {
-            //prima send che contiene la lunghezza della struttura in invio
-            MPI_Send(&row[i], 1, MPI_INT, i, tag, MPI_COMM_WORLD);
-            //seconda send con la struttura, quanto inviare è stabilito in row[i]
-            MPI_Send(&sp[index], row[i], st, i, tag + 1, MPI_COMM_WORLD);
-            //incremento index per il processo successivo
-            index += row[i];
-        }
-        int dim = 0;
-        for (int i = 0; i < row[0]; i++)
-        {
-            /*riempio l'array tante volte quanti sono i file 
-            da cui il processo 0 deve attingere i byte*/
-            dim = riempioArray(array, sp[i], dim);
-        }
-        Word words[LENGTH];
-        Word tmp[LENGTH];
-        /*calcola la frequenza delle parole contenute 
-        nella porzione di array assegnatogli*/
-        int sizeStructWord = calcolaFrequenza(array, dim, words);
-        for (int i = 1; i < p; i++)
-        {
-            int sizeRecive;
-            //ricevo la dimensione della struttura in arrivo alla recive successiva
-            MPI_Recv(&sizeRecive, 1, MPI_INT, i, tag, MPI_COMM_WORLD, &status);
-            //ricevo la struttura calcolata da ciuascun processo
-            MPI_Recv(&tmp, sizeRecive, w, i, tag + 1, MPI_COMM_WORLD, &status);
-            /*unisco i risultati mandati dal processo i con i risultati globali
-             contenuti nella struttura del processo 0*/
-            sizeStructWord = unisciResult(tmp, sizeRecive, words, sizeStructWord);
-        }
-        //creao file csv
-        creaCSV(words, sizeStructWord);
-        //calcolo e stampo il tempo di computazione
-        clock_t end = clock();
-        double time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
-        printf("execution time = %lf\n", time_spent);
-    }
-    else
-    {
-        int siz;
-        //ricevo la dimensione della struttura in arrivo nella recive succssive
-        MPI_Recv(&siz, 1, MPI_INT, 0, tag, MPI_COMM_WORLD, &status);
-        /*ricevo la struttura contente le informazioni 
-        necessarie per consuamre byte nei file*/
-        MPI_Recv(&sp, siz, st, 0, tag + 1, MPI_COMM_WORLD, &status);
-        char array[LENGTH][CHARLENGTH];
-        int index = 0;
-        for (int i = 0; i < siz; i++)
-        {
-            /*riempio l'array tante volte quanti sono i file da cui
-             il processo corrente deve attingere i byte*/
-            index = riempioArray(array, sp[i], index);
-        }
-        Word words[LENGTH];
-        /*calcola la frequenza delle parole contenute nella 
-        porzione di array inviatogli*/
-        int size2 = calcolaFrequenza(array, index, words);
-        /*mando la dimensione della struttura 
-        che verrà inviata alla prossima send*/
-        MPI_Send(&size2, 1, MPI_INT, 0, tag, MPI_COMM_WORLD);
-        /*mando la struttura contenente le parole e 
-        la frequenza calcolate dal processo corrente*/
-        MPI_Send(&words, size2, w, 0, tag + 1, MPI_COMM_WORLD);
-    }
-    //libero la memoria e chiudo i processi
-    MPI_Type_free(&st);
-    MPI_Type_free(&w);
-    MPI_Finalize();
-    return 0;
+    return size;
 }
 ```
+
+A questo punto i porcessi SLAVE inviano la struttura *Word* calcolata al MASTER, quest'ultimo riceve le strutture e via via fonde le strutture ottenute con quella da lui calcolata con la funzione *unisciResult(Word w1[LENGTH], int sizeW1, Word w2[LENGTH], int sizeW2)* che, dati due array di Word e le loro dimensioni, fonde i risultati nella struttura w2. 
+
+Infine il processo MASTER crea un file CSV con i risultati ottenuti dalla struttura Word finale.
 
 ### Note sulla compilazione
 
@@ -566,11 +346,11 @@ Specificando in p il numero di processi coinvolti nell'esecuzione.
 
 ### Note sull'implementazione
 
-Le parti in evidenza dell'algoritmo sono spiegate nei commenti nel codice soprastante.
+Le parti salienti del codice sono descritte nelle sezioni precedenti, è possibile vedere l'intero codice sorgente dal file "*WordCounter.c*" allegato, dove ogni sezione è ampiemente descritta con commenti.
 
 Nei file le parole sono seguite da '\n' per semplificare la lettura nell'implementazione.
 
-Il limite imposto nell'algoritmo proposto sono parole lunghe al massimo 20 caratteri (nell'alfabeto italiano non esistono parole così lunghe), mentre il numero di parole totali che è possibile esaminare (con 1 processo) è 120.000 poiché utilizzando la gestione della memoria dinamica, e quindi puntatori, essa creava problemi nell'utilizzo delle send e recive.
+Il limite imposto nell'algoritmo proposto sono parole lunghe al massimo 20 caratteri (nell'alfabeto italiano non esistono parole così lunghe), mentre il numero di parole totali che è possibile esaminare (con 1 processo) è 120.000 poiché è il limite imposto alla dimensione dell'array, per incrementare cambiare il valore nella *define* iniziale.
 
 ## Risultati
 

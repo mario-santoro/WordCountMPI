@@ -7,7 +7,7 @@
 #include <dirent.h>
 #include <sys/param.h>
 #include <time.h>
-#define LENGTH 120000 //al massimo 100000 parole
+#define LENGTH 120000 //al massimo 120000 parole
 #define LBYTE 1000
 #define CHARLENGTH 20 //non esistono parole più lunghe di 20 caratteri
 char PATHNAME[MAXPATHLEN];
@@ -125,6 +125,7 @@ int CalcolaByte(SizeByte byte[LBYTE])
                 strcpy(byte[j].file, ptr);
                 strcpy(path, PATHNAME);
                 strcat(path, ptr);
+              
                 if ((fp = fopen(path, "rt")) == NULL)
                 {
                     printf("Errore nell'apertura del file'");
@@ -206,7 +207,7 @@ int splitByte(SizeByte byte[LBYTE], long taglia, ByteSplit sp[LBYTE], long *part
     (totale byte di tutti i file) si può uscire dal while*/
     int res = 0;
     do
-    {
+    {         
         //setto da dove il processo deve iniziare a consumare byte
         sp[j].start = start;
         sp[j].rank = rank; //setto il rank corrente
@@ -217,7 +218,7 @@ int splitByte(SizeByte byte[LBYTE], long taglia, ByteSplit sp[LBYTE], long *part
             //setto in rank le righe totali della struttura utilizzati dal processo
             send[rank] = count + 1;
             //copio il nome del file nella struttura sp
-            strcpy(sp[j].nameFile, byte[i].file);
+            strcpy(sp[j].nameFile, byte[i].file);           
             /*l'end è l'inizio + il valore che doveva 
             consumare il processo (-1)*/
             end = start + partitioning[rank] - 1;
@@ -236,10 +237,9 @@ int splitByte(SizeByte byte[LBYTE], long taglia, ByteSplit sp[LBYTE], long *part
             start = end;
             //count torna a 0 per il processo successivo
             count = 0;
-            /* se  ciò che deve consumare il processo è strettamente uguale 
-            alla dimensione totale del file i-esimo allora devo 
-            passare al file successivo*/
-            if (partitioning[rank] == byte[i].sizeByte)
+            /* se  il file è rimasto a 0 byte  
+            devo passare al file successivo*/
+            if (byte[i].sizeByte==0)
             {
                 i++;
             }
@@ -264,6 +264,7 @@ int splitByte(SizeByte byte[LBYTE], long taglia, ByteSplit sp[LBYTE], long *part
             count++;
             //setto nella struttura il nome del file
             strcpy(sp[j].nameFile, byte[i].file);
+           
             i++; //passo al file successivo
         }
         j++; //incremento la struttura ByteSplit
@@ -330,7 +331,7 @@ int riempioArray(char array[LENGTH][CHARLENGTH], ByteSplit sp, int start)
     strcat(PATHNAME, "/file/");
     strcpy(path, PATHNAME);
     //concateno con il nome del file
-    strcat(path, sp.nameFile);
+    strcat(path, sp.nameFile);     
     if ((fp = fopen(path, "rt")) == NULL)
     {
         printf("Errore nell'apertura del file'");
@@ -438,11 +439,12 @@ int main(int argc, char *argv[])
     {
         /*"size" contiene la lunghezza totale in byte dei file, mentre 
         in "byte" le informazioni: nome file e size in Byte*/
-        long size = CalcolaByte(byte);
+        long size = CalcolaByte(byte);     
         long part[p];
         int row[p];
         //suddivisione della dimensione totale dei byte per i processi
         partitioning(size, p, part);
+       
         //riempio la struttura ByteSplit sp con le informazioni da inviare ai processi
         int siz = splitByte(byte, size, sp, part, row);
         char array[LENGTH][CHARLENGTH];

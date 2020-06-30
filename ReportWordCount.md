@@ -356,7 +356,7 @@ Il limite imposto nell'algoritmo proposto sono parole lunghe al massimo 20 carat
 
 ---
 
-**Scalabilità forte**
+**Scalabilità debole**
 
 | P:     | 1          | 2          | 3          | 4          | 5          | 6          | 7          | 8          |
 |:------:|:----------:|:----------:|:----------:|:----------:|:----------:|:----------:|:----------:|:----------:|
@@ -414,7 +414,7 @@ Il limite imposto nell'algoritmo proposto sono parole lunghe al massimo 20 carat
 }
 ```
 
-**Scalabilità debole**
+**Scalabilità forte**
 
 Per N= 110.000
 
